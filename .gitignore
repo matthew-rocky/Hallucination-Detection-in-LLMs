@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Windows clutter
+desktop.ini
+Thumbs.db
+
+# Test and coverage artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local app/runtime artifacts
+.codex_tmp/
+artifacts/
+.streamlit/secrets.toml
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+# Local packaging and backup artifacts
+__restore_tmp/
+*.zip
