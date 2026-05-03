@@ -1,0 +1,379 @@
+@import "@xyflow/react/dist/style.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  background: #050712;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    linear-gradient(rgba(8, 13, 28, 0.74), rgba(8, 13, 28, 0.74)),
+    linear-gradient(rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 12% 10%, rgba(34, 211, 238, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 4%, rgba(168, 85, 247, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 72%, rgba(244, 63, 94, 0.12), transparent 30%),
+    linear-gradient(135deg, #050712 0%, #0d1224 48%, #06151c 100%);
+  background-size: auto, 42px 42px, 42px 42px, auto, auto, auto, auto;
+  color: #e5eefb;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body,
+html {
+  min-height: 100vh;
+}
+
+body > div {
+  min-height: 100vh;
+}
+
+html.light {
+  color-scheme: light;
+  background: #eef6ff;
+}
+
+html.light body {
+  background:
+    linear-gradient(rgba(248, 250, 252, 0.76), rgba(248, 250, 252, 0.78)),
+    linear-gradient(rgba(14, 165, 233, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 12% 10%, rgba(14, 165, 233, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 4%, rgba(124, 58, 237, 0.13), transparent 28%),
+    radial-gradient(circle at 88% 72%, rgba(45, 212, 191, 0.14), transparent 30%),
+    linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #edfdf8 100%);
+  color: #0f172a;
+}
+
+button,
+textarea,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+textarea,
+input,
+select {
+  color: #e5eefb;
+}
+
+.ambient {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.ambient::before,
+.ambient::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.34;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+.ambient {
+  background:
+    radial-gradient(circle at 24% 32%, rgba(34, 211, 238, 0.055) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 44%, rgba(167, 139, 250, 0.055) 0 1px, transparent 2px),
+    linear-gradient(115deg, transparent 0%, rgba(34, 211, 238, 0.025) 48%, transparent 52%);
+  background-size: 96px 96px, 132px 132px, 260px 260px;
+  animation: scan-drift 28s linear infinite;
+}
+
+.ambient::before {
+  left: 8%;
+  top: 18%;
+  background: rgba(45, 212, 191, 0.42);
+}
+
+.ambient::after {
+  right: 6%;
+  top: 8%;
+  background: rgba(217, 70, 239, 0.34);
+  animation-delay: -6s;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(42px, 36px, 0) scale(1.14);
+  }
+}
+
+@keyframes scan-drift {
+  from {
+    background-position: 0 0, 0 0, -260px 0;
+  }
+  to {
+    background-position: 96px 48px, -132px 66px, 260px 0;
+  }
+}
+
+@keyframes ai-scan {
+  from {
+    transform: translateX(-40%);
+    opacity: 0.02;
+  }
+  50% {
+    opacity: 0.08;
+  }
+  to {
+    transform: translateX(40%);
+    opacity: 0.02;
+  }
+}
+
+.glass {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.42));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter: blur(28px);
+}
+
+html.light .glass {
+  border-color: rgba(148, 163, 184, 0.34);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.58));
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255,255,255,0.82);
+}
+
+html.light .glass::before,
+html.light .glass-panel-ai::before,
+html.light .ai-grid-bg::before {
+  opacity: 0.18;
+}
+
+html.light .glass::after,
+html.light .glass-panel-ai::after,
+html.light .ai-neural-bg::after {
+  opacity: 0.22;
+}
+
+html.light .ambient {
+  opacity: 0.62;
+}
+
+html.light .text-white,
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #0f172a;
+}
+
+html.light .text-slate-300 {
+  color: #334155;
+}
+
+html.light .text-slate-400,
+html.light .text-slate-500 {
+  color: #64748b;
+}
+
+html.light .border-white\/10,
+html.light .border-white\/20 {
+  border-color: rgba(148, 163, 184, 0.32);
+}
+
+html.light .bg-slate-950\/80,
+html.light .bg-slate-950\/75,
+html.light .bg-slate-950\/70,
+html.light .bg-slate-950\/65,
+html.light .bg-slate-950\/60,
+html.light .bg-slate-950\/55,
+html.light .bg-slate-950\/50,
+html.light .bg-slate-950\/45,
+html.light .bg-slate-950\/40,
+html.light .bg-slate-950\/35 {
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+html.light .bg-white\/5,
+html.light .bg-white\/8,
+html.light .bg-white\/10,
+html.light .bg-white\/12,
+html.light .bg-white\/15 {
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+html.light textarea,
+html.light input,
+html.light select {
+  color: #0f172a;
+}
+
+html.light textarea::placeholder,
+html.light input::placeholder {
+  color: #64748b;
+}
+
+.glass > * {
+  position: relative;
+  z-index: 1;
+}
+
+.glass::before,
+.glass-panel-ai::before,
+.ai-grid-bg::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(rgba(34, 211, 238, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: 0.34;
+  z-index: 0;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.86), rgba(0,0,0,0.2));
+}
+
+.glass::after,
+.glass-panel-ai::after,
+.ai-neural-bg::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(34, 211, 238, 0.13) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 38%, rgba(45, 212, 191, 0.11) 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 78%, rgba(168, 85, 247, 0.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 82%, rgba(34, 211, 238, 0.08), transparent 26%);
+  background-size: 92px 92px, 128px 128px, 150px 150px, auto;
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.glass-panel-ai {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel-ai > :not(.ai-decor):not(.ai-content-absolute) {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-panel-ai > .ai-decor {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.glass-panel-ai > .ai-content-absolute {
+  position: absolute;
+  z-index: 2;
+}
+
+.ai-scan-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-scan-bg::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: -20%;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 35%, rgba(34, 211, 238, 0.10) 48%, rgba(168, 85, 247, 0.06) 52%, transparent 65%);
+  animation: ai-scan 16s ease-in-out infinite;
+  z-index: 0;
+}
+
+.ai-risk-bg-low::after {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(16, 185, 129, 0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 44%, rgba(45, 212, 191, 0.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 82%, rgba(16, 185, 129, 0.10), transparent 26%);
+}
+
+.ai-risk-bg-medium::after {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(250, 204, 21, 0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 44%, rgba(251, 191, 36, 0.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 82%, rgba(250, 204, 21, 0.10), transparent 26%);
+}
+
+.ai-risk-bg-high::after {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(244, 63, 94, 0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 44%, rgba(251, 113, 133, 0.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 82%, rgba(244, 63, 94, 0.11), transparent 26%);
+}
+
+.glow-border {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 42px rgba(34, 211, 238, 0.12);
+}
+
+.risk-low {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.24), rgba(20, 184, 166, 0.12));
+  color: #b6f7dc;
+  box-shadow: 0 0 26px rgba(16, 185, 129, 0.18);
+}
+
+.risk-medium {
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.24), rgba(249, 115, 22, 0.12));
+  color: #fde7a1;
+  box-shadow: 0 0 26px rgba(250, 204, 21, 0.16);
+}
+
+.risk-high {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.26), rgba(236, 72, 153, 0.14));
+  color: #fecaca;
+  box-shadow: 0 0 30px rgba(248, 113, 113, 0.2);
+}
+
+.risk-na {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.xy-flow {
+  background: transparent;
+}
+
+.react-flow__controls-button {
+  background: #0f172a;
+  color: #dbeafe;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient,
+  .ai-scan-bg::after,
+  .ambient::before,
+  .ambient::after {
+    animation: none;
+  }
+}

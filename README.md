@@ -1,17 +1,19 @@
-# Hallucination Detector Family Comparison Prototype
+# Hallucination Detector Family Comparison Dashboard
 
-This is a Streamlit prototype for comparing several hallucination-detection approaches on the same inputs. It is meant for local experimentation and teaching, not for benchmarking detector quality or deploying a safety system.
+This project now includes a full-stack dashboard for comparing several hallucination-detection approaches on the same inputs. It is meant for local experimentation and teaching, not for benchmarking detector quality or deploying a safety system.
 
-The app focuses on method shape: what each detector needs as input, what it can inspect, and what kind of trace it returns. Some paths use a real local backend. Others are lightweight approximations that keep the interface and result schema comparable while leaving the limitations visible.
+The detector logic remains in the original Python modules. A FastAPI backend wraps those methods, and a Next.js dashboard renders the analysis workflow, comparison charts, traces, evidence, citations, and curated sample cases.
 
 ## What Runs
 
-The current app supports two modes:
+The dashboard supports two modes:
 
 - `Quick Check`: run one selected method on the current input.
 - `Compare Methods`: run several methods side by side and compare their scores, labels, citations, and traces.
 
 Each method returns a shared result dictionary with a risk score, label, confidence, explanation, evidence/citation fields, optional intermediate steps, and metadata about the runtime path.
+
+The original Streamlit app is still available through `app.py`. The recommended app is the new FastAPI + Next.js dashboard.
 
 ## Detector Paths
 
@@ -52,10 +54,16 @@ Each method returns a shared result dictionary with a risk score, label, confide
 
 ```text
 app.py                         Streamlit entry point and method runner glue
+backend/main.py                FastAPI entry point
+backend/schemas.py             API request and response models
+backend/services/              Service wrapper around existing method runners
 data/sample_cases.py           Curated low/high examples for each method
 detectors/                     Lower-level detector implementations
 methods/                       Public method wrappers used by the UI
 retrieval/                     Local document ingestion, chunking, indexing
+frontend/app/                  Next.js app router pages and global styles
+frontend/components/           Dashboard UI components
+frontend/lib/                  Typed API client and TypeScript interfaces
 ui/                            Streamlit layout, forms, result rendering
 utils/                         Text, scoring, grounding, and revision helpers
 scripts/                       Retrieval-index and internal-probe utilities
@@ -72,6 +80,13 @@ Create and activate a Python environment, then install dependencies:
 pip install -r requirements.txt
 ```
 
+Install frontend dependencies from the `frontend` directory:
+
+```bash
+cd frontend
+npm install
+```
+
 The internal-signal backends depend on local Hugging Face model loading. The default model name is `distilgpt2`; override it with:
 
 ```bash
@@ -80,7 +95,69 @@ set HD_INTERNAL_LAYERS=-1,-3,-5
 set HD_HF_LOCAL_ONLY=1
 ```
 
-## Run
+## Run the Full-Stack Dashboard
+
+Start the FastAPI backend from the repository root:
+
+```bash
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Start the Next.js frontend in a second terminal:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open `http://localhost:3000`. The frontend expects the backend at `http://127.0.0.1:8000` by default. Override this with `NEXT_PUBLIC_API_BASE_URL` if needed.
+
+Optional environment file:
+
+```bash
+copy frontend\.env.local.example frontend\.env.local
+```
+
+Root helper scripts are also available:
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+npm run build:frontend
+npm run test:python
+```
+
+On Windows, `START_FULLSTACK.bat` starts both services in separate terminals. It activates `.venv` when present, then launches:
+
+```bat
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+cd frontend
+npm run dev
+```
+
+Use Node.js 18.18 or newer for the Next.js frontend. The FastAPI backend keeps the detector logic in Python and calls the existing modules in `methods/`, `detectors/`, `retrieval/`, `utils/`, and `data/sample_cases.py`.
+
+The dashboard has these working tabs:
+
+- `Overview`: status, method counts, risk metrics, and quick actions.
+- `Ask Studio`: chatbot-style question/answer audit interface.
+- `Analyze`: advanced method-aware form with dynamic required and optional fields.
+- `Samples`: curated low/high sample browser backed by `data/sample_cases.py`.
+- `Results`: detailed risk card, explanation, claims, evidence, citations, trace, and metadata.
+- `Compare`: Recharts risk/confidence comparison and method ranking.
+- `Method Flow`: animated React Flow detector pipeline.
+- `Method Library`: all eight method cards, using backend metadata when online and local fallback metadata when offline.
+- `Report / Export`: Markdown and JSON export from the latest analysis.
+
+If the dashboard shows `Backend offline`, start or restart the backend with:
+
+```bash
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+The frontend keeps showing fallback method metadata while offline, but samples and real analysis require FastAPI. `frontend/node_modules/`, `frontend/.next/`, Python cache folders, runtime artifacts, and zip backups are intentionally ignored by git because they are generated locally and can be recreated.
+
+## Run the Streamlit App
 
 ```bash
 streamlit run app.py

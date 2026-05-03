@@ -1,4 +1,5 @@
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 
@@ -13,6 +14,12 @@ Thumbs.db
 .coverage
 coverage.xml
 htmlcov/
+
+# Frontend artifacts
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
 
 # Local app/runtime artifacts
 .codex_tmp/
