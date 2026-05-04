@@ -20,7 +20,7 @@ export function AskStudioPage({
   setField: (key: keyof StudioForm, value: string) => void;
   toggleMethod: (method: string) => void;
   run: () => void;
-  loadRiskSample: (risk: "Low" | "High", tab?: "ask" | "analyze") => void;
+  loadRiskSample: (risk: "Low" | "High", tab?: "askQuick" | "compareDetectors") => void;
   loadSelectedSample: (sample: SampleCase) => void;
   runSample: (sample: SampleCase) => void;
   setTab: (tab: TabId) => void;
@@ -41,7 +41,7 @@ export function AskStudioPage({
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-cyan-300/15 text-cyan-100 ring-1 ring-cyan-300/25"><Bot /></div>
-            <div><h1 className="text-2xl font-semibold text-white">Ask Studio</h1><p className="text-sm text-slate-400">Conversational answer audit workspace</p></div>
+            <div><h1 className="text-2xl font-semibold text-white">ASK Quick Mode</h1><p className="text-sm text-slate-400">Fast single-answer review with a simple workflow.</p></div>
           </div>
           <span className={`rounded-full px-3 py-2 text-xs font-semibold ${state.backendOnline ? "bg-emerald-300/12 text-emerald-100" : "bg-rose-300/12 text-rose-100"}`}>Backend {state.backendOnline ? "online" : "offline"}</span>
         </div>
@@ -56,8 +56,8 @@ export function AskStudioPage({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <button onClick={() => loadRiskSample("Low", "ask")} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-300/15 px-4 py-3 text-sm font-semibold text-emerald-100 hover:bg-emerald-300/20"><ShieldCheck size={16} /> Load low-risk sample</button>
-          <button onClick={() => loadRiskSample("High", "ask")} className="inline-flex items-center gap-2 rounded-2xl bg-rose-300/15 px-4 py-3 text-sm font-semibold text-rose-100 hover:bg-rose-300/20"><ShieldX size={16} /> Load high-risk sample</button>
+          <button onClick={() => loadRiskSample("Low", "askQuick")} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-300/15 px-4 py-3 text-sm font-semibold text-emerald-100 hover:bg-emerald-300/20"><ShieldCheck size={16} /> Load low-risk sample</button>
+          <button onClick={() => loadRiskSample("High", "askQuick")} className="inline-flex items-center gap-2 rounded-2xl bg-rose-300/15 px-4 py-3 text-sm font-semibold text-rose-100 hover:bg-rose-300/20"><ShieldX size={16} /> Load high-risk sample</button>
           <button onClick={() => setPickerOpen(true)} className="inline-flex items-center gap-2 rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950"><BookOpen size={16} /> Browse samples</button>
           <button onClick={() => setTab("samples")} className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/15">Open Samples page</button>
         </div>
@@ -73,7 +73,7 @@ export function AskStudioPage({
               <textarea value={state.sampled_answers_text} onChange={(e) => setField("sampled_answers_text", e.target.value)} placeholder="Sampled answers" className="min-h-32 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm outline-none" />
             </div>
           </details>
-          <button disabled={!state.backendOnline || state.loading} onClick={run} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-5 py-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"><Send size={17} /> Analyze this answer</button>
+          <button disabled={!state.backendOnline || state.loading} onClick={run} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-5 py-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"><Send size={17} /> Check this answer</button>
           {result && (
             <div className="mt-5 w-full overflow-visible">
               <VisualResultCard result={result} state={state} />

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { analyze, getFields, getHealth, getMethods, getSamplePairs, getSamples, uploadAnalyze } from "@/lib/api";
 import { fallbackFields, fallbackMethods } from "@/lib/methodFallback";
 import { normalizeRiskLabel } from "@/lib/risk";
-import type { AnalysisHistoryItem, AnalyzeResponse, DashboardState, DetectorResult, Mode, SampleCase, StudioForm, TabId } from "@/lib/types";
+import type { AnalysisHistoryItem, AnalyzeResponse, DashboardState, DetectorResult, SampleCase, StudioForm, TabId } from "@/lib/types";
 import { AnalyzePage } from "./AnalyzePage";
 import { AskStudioPage } from "./AskStudioPage";
 import { ComparePage } from "./ComparePage";
@@ -80,13 +80,20 @@ export function AppShell() {
   };
 
   const currentSelection = (selection: string[], methods: typeof fallbackMethods) => {
-    const valid = selection.filter((name) => methods.some((m) => m.name === name));
+    const valid = Array.from(new Set(selection.filter((name) => methods.some((m) => m.name === name))));
     return valid.length ? valid : [methods[0]?.name ?? fallbackMethods[0].name];
   };
 
-  const setTab = (activeTab: TabId) => setState((s) => ({ ...s, activeTab }));
+  const setTab = (activeTab: TabId) => setState((s) => {
+    if (activeTab === "askQuick") {
+      return { ...s, activeTab, mode: "quick", selectedMethods: [s.selectedMethods[0] ?? s.methods[0].name] };
+    }
+    if (activeTab === "compareDetectors") {
+      return { ...s, activeTab, mode: "compare" };
+    }
+    return { ...s, activeTab };
+  });
   const setField = (key: keyof StudioForm, value: string) => setState((s) => ({ ...s, [key]: value }));
-  const setMode = (mode: Mode) => setState((s) => ({ ...s, mode, selectedMethods: mode === "quick" ? [s.selectedMethods[0] ?? s.methods[0].name] : s.selectedMethods }));
 
   const toggleMethod = (method: string) => {
     setState((s) => {
@@ -122,13 +129,13 @@ export function AppShell() {
     }
   };
 
-  const loadSample = (sample: SampleCase, tab: "ask" | "analyze" | "results" = "ask") => {
+  const loadSample = (sample: SampleCase, tab: "askQuick" | "compareDetectors" | "results" = "askQuick") => {
     const method = sample.recommended_methods?.[0] ?? sample.method_targets?.[0] ?? fallbackMethods[0].name;
     setState((s) => ({
       ...s,
       activeTab: tab,
-      selectedMethods: [method],
-      mode: "quick",
+      selectedMethods: tab === "compareDetectors" ? currentSelection([...(sample.recommended_methods ?? []), ...(sample.method_targets ?? [])], s.methods) : [method],
+      mode: tab === "compareDetectors" ? "compare" : "quick",
       question: sample.question,
       answer: sample.answer,
       source_text: sample.source_text,
@@ -140,10 +147,10 @@ export function AppShell() {
   };
 
   const runSample = async (sample: SampleCase) => {
-    loadSample(sample, "ask");
+    loadSample(sample, "askQuick");
     const method = sample.recommended_methods?.[0] ?? sample.method_targets?.[0] ?? fallbackMethods[0].name;
     if (!state.backendOnline) return;
-    setState((s) => ({ ...s, activeTab: "ask", loadedSample: sample, loading: true, error: "" }));
+    setState((s) => ({ ...s, activeTab: "askQuick", mode: "quick", selectedMethods: [method], loadedSample: sample, loading: true, error: "" }));
     try {
       const response = await analyze({
         mode: "quick",
@@ -162,11 +169,17 @@ export function AppShell() {
 
   const quickLoadSample = () => {
     const sample = state.samples[0];
-    if (sample) loadSample(sample, "ask");
+    if (sample) loadSample(sample, "askQuick");
     else setTab("samples");
   };
 
-  const loadRiskSample = (risk: "Low" | "High", tab: "ask" | "analyze" = "ask") => {
+  const compareLoadSample = () => {
+    const sample = state.samples[0];
+    if (sample) loadSample(sample, "compareDetectors");
+    else setTab("samples");
+  };
+
+  const loadRiskSample = (risk: "Low" | "High", tab: "askQuick" | "compareDetectors" = "askQuick") => {
     const selected = state.selectedMethods[0];
     const sample =
       state.samples.find((item) => normalizeRiskLabel(item.risk_level) === risk && (item.method_targets?.includes(selected) || item.recommended_methods?.includes(selected))) ??
@@ -217,11 +230,11 @@ export function AppShell() {
 
   const page = {
     overview: <OverviewPage state={state} setTab={setTab} loadSample={quickLoadSample} />,
-    ask: <AskStudioPage state={state} setField={setField} toggleMethod={toggleMethod} run={runAnalysis} loadRiskSample={loadRiskSample} loadSelectedSample={(sample) => loadSample(sample, "ask")} runSample={runSample} setTab={setTab} />,
-    analyze: <AnalyzePage state={state} fields={state.fields} files={state.uploadedFiles} setMode={setMode} toggleMethod={toggleMethod} setField={setField} setFiles={(uploadedFiles) => setState((s) => ({ ...s, uploadedFiles }))} clear={clear} run={runAnalysis} loadSample={quickLoadSample} />,
+    askQuick: <AskStudioPage state={state} setField={setField} toggleMethod={toggleMethod} run={runAnalysis} loadRiskSample={loadRiskSample} loadSelectedSample={(sample) => loadSample(sample, "askQuick")} runSample={runSample} setTab={setTab} />,
+    compareDetectors: <AnalyzePage state={state} fields={state.fields} files={state.uploadedFiles} toggleMethod={toggleMethod} setField={setField} setFiles={(uploadedFiles) => setState((s) => ({ ...s, uploadedFiles }))} clear={clear} run={runAnalysis} loadSample={compareLoadSample} />,
     samples: <SamplesPage state={state} loadSample={loadSample} runSample={runSample} />,
     results: <ResultsPage state={state} setSelectedResult={setSelectedResult} setTab={setTab} loadRiskSample={loadRiskSample} />,
-    compare: <ComparePage state={state} setTab={setTab} />,
+    compareResults: <ComparePage state={state} setTab={setTab} />,
     flow: <MethodFlowPage state={state} selectMethod={selectFlowMethod} />,
     library: <MethodLibraryPage state={state} />,
     report: <ReportPage state={state} />

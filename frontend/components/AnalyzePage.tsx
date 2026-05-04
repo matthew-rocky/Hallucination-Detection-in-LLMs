@@ -1,7 +1,7 @@
 "use client";
 
 import { RotateCcw, UploadCloud, Zap } from "lucide-react";
-import type { DashboardState, FieldSpec, Mode, StudioForm } from "@/lib/types";
+import type { DashboardState, FieldSpec, StudioForm } from "@/lib/types";
 import { MethodCard } from "./MethodCard";
 import { VisualResultCard } from "./VisualResultCard";
 
@@ -18,7 +18,6 @@ export function AnalyzePage({
   state,
   fields,
   files,
-  setMode,
   toggleMethod,
   setField,
   setFiles,
@@ -29,7 +28,6 @@ export function AnalyzePage({
   state: DashboardState;
   fields: Record<string, FieldSpec>;
   files: File[];
-  setMode: (mode: Mode) => void;
   toggleMethod: (method: string) => void;
   setField: (key: keyof StudioForm, value: string) => void;
   setFiles: (files: File[]) => void;
@@ -43,14 +41,12 @@ export function AnalyzePage({
     <div className="space-y-5">
       <div className="glass rounded-3xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h1 className="text-2xl font-semibold text-white">Advanced Analyze</h1><p className="mt-1 text-sm text-slate-400">Dynamic method-aware fields powered by backend metadata.</p></div>
-          <div className="grid grid-cols-2 rounded-2xl border border-white/10 bg-slate-950/50 p-1">
-            {(["quick", "compare"] as Mode[]).map((mode) => <button key={mode} onClick={() => setMode(mode)} className={`rounded-xl px-4 py-2 text-sm font-semibold ${state.mode === mode ? "bg-cyan-300 text-slate-950" : "text-slate-300"}`}>{mode === "quick" ? "Quick" : "Compare"}</button>)}
-          </div>
+          <div><h1 className="text-2xl font-semibold text-white">Compare Detectors</h1><p className="mt-1 text-sm text-slate-400">Advanced detector comparison workspace with method-aware inputs.</p></div>
+          <span className="rounded-full bg-cyan-300/15 px-3 py-2 text-xs font-semibold text-cyan-100">Compare mode</span>
         </div>
-        {state.mode === "compare" && state.selectedMethods.length < 2 && (
+        {state.selectedMethods.length < 2 && (
           <div className="mt-4 rounded-2xl border border-amber-300/25 bg-amber-300/10 p-3 text-sm text-amber-100">
-            Compare mode is most useful with at least two selected methods. Select another detector before running.
+            Select two or more detector methods to compare behavior, risk scoring, confidence, and evidence handling.
           </div>
         )}
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -78,7 +74,7 @@ export function AnalyzePage({
             })}
           </div>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button disabled={!state.backendOnline || state.loading} onClick={run} className="inline-flex items-center gap-2 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 disabled:opacity-50"><Zap size={17} /> Run analysis</button>
+            <button disabled={!state.backendOnline || state.loading} onClick={run} className="inline-flex items-center gap-2 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 disabled:opacity-50"><Zap size={17} /> Compare selected detectors</button>
             <button onClick={clear} className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-semibold text-white"><RotateCcw size={17} /> Clear form</button>
             <button onClick={loadSample} className="rounded-2xl bg-fuchsia-300/15 px-5 py-3 text-sm font-semibold text-fuchsia-100">Load sample</button>
           </div>

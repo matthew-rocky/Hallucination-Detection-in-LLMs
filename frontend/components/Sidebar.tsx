@@ -5,11 +5,11 @@ import type { TabId } from "@/lib/types";
 
 const tabs: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "ask", label: "Ask Studio", icon: Bot },
-  { id: "analyze", label: "Analyze", icon: FlaskConical },
+  { id: "askQuick", label: "ASK Quick Mode", icon: Bot },
+  { id: "compareDetectors", label: "Compare Detectors", icon: FlaskConical },
   { id: "samples", label: "Samples", icon: BookOpen },
   { id: "results", label: "Results", icon: SearchCheck },
-  { id: "compare", label: "Compare", icon: BarChart3 },
+  { id: "compareResults", label: "Compare Results", icon: BarChart3 },
   { id: "flow", label: "Method Flow", icon: GitBranch },
   { id: "library", label: "Method Library", icon: Library },
   { id: "report", label: "Report / Export", icon: FileDown }

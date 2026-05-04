@@ -8,12 +8,12 @@ import { RiskBadge } from "./RiskBadge";
 export function SampleCard({
   sample,
   onLoadAsk,
-  onLoadAnalyze,
+  onLoadCompareDetectors,
   onRun
 }: {
   sample: SampleCase;
   onLoadAsk: () => void;
-  onLoadAnalyze: () => void;
+  onLoadCompareDetectors: () => void;
   onRun: () => void;
 }) {
   return (
@@ -30,8 +30,8 @@ export function SampleCard({
         {(sample.available_inputs ?? []).map((item) => <span key={item} className="rounded-full bg-white/8 px-2 py-1 text-[10px] text-slate-400">{item}</span>)}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <button onClick={onLoadAsk} className="rounded-xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">Load into Ask Studio</button>
-        <button onClick={onLoadAnalyze} className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-slate-100">Load into Analyze</button>
+        <button onClick={onLoadAsk} className="rounded-xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">Load into ASK Quick Mode</button>
+        <button onClick={onLoadCompareDetectors} className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-slate-100">Load into Compare Detectors</button>
         <button onClick={onRun} className="inline-flex items-center gap-1 rounded-xl bg-emerald-300/15 px-3 py-2 text-xs font-semibold text-emerald-100">
           <Play size={13} /> Run now
         </button>

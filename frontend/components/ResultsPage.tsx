@@ -15,7 +15,7 @@ export function ResultsPage({
   state: DashboardState;
   setSelectedResult: (name: string) => void;
   setTab: (tab: TabId) => void;
-  loadRiskSample: (risk: "Low" | "High", tab?: "ask" | "analyze") => void;
+  loadRiskSample: (risk: "Low" | "High", tab?: "askQuick" | "compareDetectors") => void;
 }) {
   const result = state.selectedResult;
   if (!result) {
@@ -23,8 +23,8 @@ export function ResultsPage({
       <EmptyState
         icon={BookOpen}
         title="No detector result yet"
-        message="Load a curated low-risk or high-risk sample, or run Ask Studio / Analyze to generate real method outputs."
-        actions={<><button onClick={() => loadRiskSample("Low", "ask")} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-300/15 px-4 py-3 text-sm font-semibold text-emerald-100"><ShieldCheck size={16} /> Load low-risk sample</button><button onClick={() => loadRiskSample("High", "ask")} className="inline-flex items-center gap-2 rounded-2xl bg-rose-300/15 px-4 py-3 text-sm font-semibold text-rose-100"><ShieldX size={16} /> Load high-risk sample</button><button onClick={() => setTab("ask")} className="rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950">Go to Ask Studio</button><button onClick={() => setTab("samples")} className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">Go to Samples</button></>}
+        message="Load a curated low-risk or high-risk sample, or run ASK Quick Mode / Compare Detectors to generate real method outputs."
+        actions={<><button onClick={() => loadRiskSample("Low", "askQuick")} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-300/15 px-4 py-3 text-sm font-semibold text-emerald-100"><ShieldCheck size={16} /> Load low-risk sample</button><button onClick={() => loadRiskSample("High", "askQuick")} className="inline-flex items-center gap-2 rounded-2xl bg-rose-300/15 px-4 py-3 text-sm font-semibold text-rose-100"><ShieldX size={16} /> Load high-risk sample</button><button onClick={() => setTab("askQuick")} className="rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950">Go to ASK Quick Mode</button><button onClick={() => setTab("samples")} className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">Go to Samples</button></>}
       />
     );
   }

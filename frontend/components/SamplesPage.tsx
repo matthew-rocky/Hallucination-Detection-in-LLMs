@@ -12,7 +12,7 @@ export function SamplesPage({
   runSample
 }: {
   state: DashboardState;
-  loadSample: (sample: SampleCase, tab: "ask" | "analyze") => void;
+  loadSample: (sample: SampleCase, tab: "askQuick" | "compareDetectors") => void;
   runSample: (sample: SampleCase) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -47,14 +47,14 @@ export function SamplesPage({
       <section className="space-y-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-emerald-100"><ShieldCheck size={18} /> LOW-RISK SAMPLES</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {low.map((sample) => <SampleCard key={sample.id} sample={sample} onLoadAsk={() => loadSample(sample, "ask")} onLoadAnalyze={() => loadSample(sample, "analyze")} onRun={() => runSample(sample)} />)}
+          {low.map((sample) => <SampleCard key={sample.id} sample={sample} onLoadAsk={() => loadSample(sample, "askQuick")} onLoadCompareDetectors={() => loadSample(sample, "compareDetectors")} onRun={() => runSample(sample)} />)}
         </div>
         {!low.length && state.samples.length > 0 && <p className="rounded-2xl bg-white/5 p-4 text-sm text-slate-500">No low-risk samples match the current filters.</p>}
       </section>
       <section className="space-y-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-rose-100"><ShieldX size={18} /> HIGH-RISK SAMPLES</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {high.map((sample) => <SampleCard key={sample.id} sample={sample} onLoadAsk={() => loadSample(sample, "ask")} onLoadAnalyze={() => loadSample(sample, "analyze")} onRun={() => runSample(sample)} />)}
+          {high.map((sample) => <SampleCard key={sample.id} sample={sample} onLoadAsk={() => loadSample(sample, "askQuick")} onLoadCompareDetectors={() => loadSample(sample, "compareDetectors")} onRun={() => runSample(sample)} />)}
         </div>
         {!high.length && state.samples.length > 0 && <p className="rounded-2xl bg-white/5 p-4 text-sm text-slate-500">No high-risk samples match the current filters.</p>}
       </section>

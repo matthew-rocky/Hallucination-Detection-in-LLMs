@@ -31,7 +31,7 @@ export function DashboardCards({
     { label: "Methods available", value: methods.length, icon: Layers3, color: "from-cyan-300/20 to-blue-400/10" },
     { label: "Selected methods", value: selectedCount, icon: Gauge, color: "from-fuchsia-300/20 to-pink-400/10" },
     { label: "Backend status", value: backendStatus, icon: Server, color: "from-emerald-300/20 to-teal-400/10" },
-    { label: "Runtime mode", value: mode === "quick" ? "Quick" : "Compare", icon: Activity, color: "from-amber-300/20 to-orange-400/10" },
+    { label: "Runtime mode", value: mode === "quick" ? "ASK Quick" : "Compare Detectors", icon: Activity, color: "from-amber-300/20 to-orange-400/10" },
     { label: "Claims checked", value: claims, icon: ShieldQuestion, color: "from-violet-300/20 to-cyan-400/10" },
     { label: "Low risk", value: counts.low, icon: ShieldCheck, color: "from-emerald-300/20 to-emerald-500/10" },
     { label: "Medium risk", value: counts.medium, icon: ShieldAlert, color: "from-yellow-300/20 to-amber-500/10" },

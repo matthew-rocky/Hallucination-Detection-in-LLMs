@@ -31,9 +31,9 @@ export function ComparePage({ state, setTab }: { state: DashboardState; setTab: 
     return (
       <EmptyState
         icon={BarChart3}
-        title="Compare mode needs multiple results"
-        message="Select two or more methods in Analyze, switch to Compare Methods, then run analysis."
-        actions={<button onClick={() => setTab("analyze")} className="rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950">Run Compare Methods</button>}
+        title="Compare Results needs multiple detector outputs"
+        message="Run two or more methods in Compare Detectors to view charts, rankings, confidence comparison, and disagreement summary."
+        actions={<button onClick={() => setTab("compareDetectors")} className="rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950">Open Compare Detectors</button>}
       />
     );
   }
@@ -52,8 +52,8 @@ export function ComparePage({ state, setTab }: { state: DashboardState; setTab: 
   return (
     <div className="w-full space-y-5">
       <div className="glass rounded-3xl p-5">
-        <h1 className="text-2xl font-semibold text-white">Compare Methods</h1>
-        <p className="mt-1 text-sm text-slate-400">Risk, confidence, implementation, and disagreement across selected real detector outputs.</p>
+        <h1 className="text-2xl font-semibold text-white">Compare Results</h1>
+        <p className="mt-1 text-sm text-slate-400">Charts, rankings, risk scores, confidence, and disagreement across real detector outputs.</p>
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <SummaryCard title="Highest risk" result={highest} icon={ShieldAlert} />

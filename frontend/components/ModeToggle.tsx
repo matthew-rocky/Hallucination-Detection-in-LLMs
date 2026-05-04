@@ -13,7 +13,7 @@ export function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (mode: Mo
             mode === item ? "bg-cyan-300 text-slate-950 shadow-glow" : "text-slate-300 hover:bg-white/8"
           }`}
         >
-          {item === "quick" ? "Quick Check" : "Compare Methods"}
+          {item === "quick" ? "ASK Quick Mode" : "Compare Detectors"}
         </button>
       ))}
     </div>

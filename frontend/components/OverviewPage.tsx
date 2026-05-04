@@ -16,14 +16,14 @@ export function OverviewPage({ state, setTab, loadSample }: { state: DashboardSt
         <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">Audit LLM answers with internal signals, source grounding, retrieval checks, staged verification, CoVe-style revision, and CRITIC-lite tool traces.</p>
         <div className="mt-7 flex flex-wrap gap-3">
           <button onClick={loadSample} className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">Start with sample</button>
-          <button onClick={() => setTab("ask")} className="rounded-2xl bg-white/10 px-5 py-3 text-sm font-semibold text-white">Open Ask Studio</button>
-          <button onClick={() => setTab("analyze")} className="rounded-2xl bg-fuchsia-300/15 px-5 py-3 text-sm font-semibold text-fuchsia-100">Run Compare Mode</button>
+          <button onClick={() => setTab("askQuick")} className="rounded-2xl bg-white/10 px-5 py-3 text-sm font-semibold text-white">Open ASK Quick Mode</button>
+          <button onClick={() => setTab("compareDetectors")} className="rounded-2xl bg-fuchsia-300/15 px-5 py-3 text-sm font-semibold text-fuchsia-100">Compare detectors</button>
         </div>
       </section>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard icon={Sparkles} label="Backend status" value={state.backendOnline ? "Online" : "Offline"} detail={state.backendOnline ? "FastAPI connected" : "UI fallback metadata active"} tone={state.backendOnline ? "green" : "rose"} />
         <MetricCard icon={Gauge} label="Methods available" value={state.methods.length} detail="All detector families visible" tone="cyan" />
-        <MetricCard icon={Bot} label="Selected methods" value={state.selectedMethods.length} detail={state.mode === "quick" ? "Quick Check" : "Compare Methods"} tone="purple" />
+        <MetricCard icon={Bot} label="Selected methods" value={state.selectedMethods.length} detail={state.mode === "quick" ? "ASK Quick Mode" : "Compare Detectors"} tone="purple" />
         <MetricCard icon={ShieldAlert} label="Last risk" value={last?.risk_label ?? "No run"} detail={last?.risk_score == null ? "Load a sample or run analysis" : `${Math.round(last.risk_score)} risk score`} tone={last?.risk_label === "High" ? "rose" : "amber"} />
         <MetricCard icon={ShieldCheck} label="Claims checked" value={state.summary?.claims_checked ?? 0} tone="indigo" />
         <MetricCard icon={Gauge} label="Analysis history" value={state.analysisHistory.length} detail={state.lastRunAt ? new Date(state.lastRunAt).toLocaleString() : "Session-local runs"} tone="cyan" />
@@ -45,9 +45,9 @@ export function OverviewPage({ state, setTab, loadSample }: { state: DashboardSt
                 <p className="mt-2 text-xs text-slate-500">{item.selected_methods.length} method(s) · avg risk {item.avg_risk}</p>
               </button>
             ))}
-            {!state.analysisHistory.length && <p className="text-sm leading-6 text-slate-400">Load a curated case or paste a question and answer in Ask Studio to generate a real detector response.</p>}
+            {!state.analysisHistory.length && <p className="text-sm leading-6 text-slate-400">Load a curated case or paste a question and answer in ASK Quick Mode to generate a real detector response.</p>}
           </div>
-          <button onClick={() => setTab(state.results.length ? "results" : "ask")} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-slate-950"><Play size={16} /> Continue</button>
+          <button onClick={() => setTab(state.results.length ? "results" : "askQuick")} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-slate-950"><Play size={16} /> Continue</button>
         </div>
       </div>
     </div>

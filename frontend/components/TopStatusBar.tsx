@@ -24,7 +24,7 @@ export function TopStatusBar({
           {online ? <Server size={14} /> : <WifiOff size={14} />} Backend {online ? "online" : "offline"}
         </span>
         <span className="rounded-full bg-white/8 px-3 py-2 text-xs text-slate-200">{methodCount} methods</span>
-        <span className="rounded-full bg-white/8 px-3 py-2 text-xs text-slate-200">{mode === "quick" ? "Quick Check" : "Compare Methods"}</span>
+        <span className="rounded-full bg-white/8 px-3 py-2 text-xs text-slate-200">{mode === "quick" ? "ASK Quick Mode" : "Compare Detectors"}</span>
         <span className="rounded-full bg-white/8 px-3 py-2 text-xs text-slate-200">{selectedCount} selected</span>
         <ThemeSelector />
       </div>

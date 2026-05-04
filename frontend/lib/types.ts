@@ -1,10 +1,10 @@
 export type TabId =
   | "overview"
-  | "ask"
-  | "analyze"
+  | "askQuick"
+  | "compareDetectors"
   | "samples"
   | "results"
-  | "compare"
+  | "compareResults"
   | "flow"
   | "library"
   | "report";
