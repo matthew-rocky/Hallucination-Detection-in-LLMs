@@ -8,7 +8,6 @@ import { normalizeRiskLabel } from "@/lib/risk";
 import type { AnalysisHistoryItem, AnalyzeResponse, DashboardState, DetectorResult, SampleCase, StudioForm, TabId } from "@/lib/types";
 import { AnalyzePage } from "./AnalyzePage";
 import { AskStudioPage } from "./AskStudioPage";
-import { ComparePage } from "./ComparePage";
 import { ErrorBanner } from "./ErrorBanner";
 import { LoadingState } from "./LoadingState";
 import { MethodFlowPage } from "./MethodFlowPage";
@@ -123,7 +122,7 @@ export function AppShell() {
     setState((s) => ({ ...s, loading: true, error: "" }));
     try {
       const response = state.uploadedFiles.length ? await uploadAnalyze(payload, state.uploadedFiles) : await analyze(payload);
-      commitAnalysisResponse(response, undefined, state.loadedSample?.id);
+      commitAnalysisResponse(response, undefined, state.loadedSample?.id, state.activeTab === "compareDetectors");
     } catch (exc) {
       setState((s) => ({ ...s, loading: false, error: exc instanceof Error ? exc.message : "Analysis failed." }));
     }
@@ -212,11 +211,13 @@ export function AppShell() {
     };
   };
 
-  const commitAnalysisResponse = (response: AnalyzeResponse, questionOverride?: string, sampleId?: string) => {
-    const selectedResult = response.results[0];
+  const commitAnalysisResponse = (response: AnalyzeResponse, questionOverride?: string, sampleId?: string, openReport = false) => {
+    const ranked = [...response.results].sort((a, b) => (b.risk_score ?? -1) - (a.risk_score ?? -1));
+    const selectedResult = response.results.length > 1 ? ranked[0] : response.results[0];
     const historyItem = makeHistoryItem(response, questionOverride ?? state.question);
     setState((s) => ({
       ...s,
+      activeTab: openReport ? "report" : s.activeTab,
       loading: false,
       results: response.results,
       selectedResult,
@@ -234,10 +235,9 @@ export function AppShell() {
     compareDetectors: <AnalyzePage state={state} fields={state.fields} files={state.uploadedFiles} toggleMethod={toggleMethod} setField={setField} setFiles={(uploadedFiles) => setState((s) => ({ ...s, uploadedFiles }))} clear={clear} run={runAnalysis} loadSample={compareLoadSample} />,
     samples: <SamplesPage state={state} loadSample={loadSample} runSample={runSample} />,
     results: <ResultsPage state={state} setSelectedResult={setSelectedResult} setTab={setTab} loadRiskSample={loadRiskSample} />,
-    compareResults: <ComparePage state={state} setTab={setTab} />,
     flow: <MethodFlowPage state={state} selectMethod={selectFlowMethod} />,
     library: <MethodLibraryPage state={state} />,
-    report: <ReportPage state={state} />
+    report: <ReportPage state={state} setTab={setTab} />
   }[state.activeTab];
 
   return (

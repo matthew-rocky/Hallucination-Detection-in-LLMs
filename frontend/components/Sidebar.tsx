@@ -1,18 +1,17 @@
 "use client";
 
-import { BarChart3, BookOpen, Bot, FileDown, FlaskConical, GitBranch, LayoutDashboard, Library, Network, SearchCheck } from "lucide-react";
+import { BookOpen, Bot, FileDown, FlaskConical, GitBranch, LayoutDashboard, Library, Network, SearchCheck } from "lucide-react";
 import type { TabId } from "@/lib/types";
 
 const tabs: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "askQuick", label: "ASK Quick Mode", icon: Bot },
   { id: "compareDetectors", label: "Compare Detectors", icon: FlaskConical },
-  { id: "samples", label: "Samples", icon: BookOpen },
+  { id: "report", label: "Report / Export", icon: FileDown },
   { id: "results", label: "Results", icon: SearchCheck },
-  { id: "compareResults", label: "Compare Results", icon: BarChart3 },
+  { id: "samples", label: "Samples", icon: BookOpen },
   { id: "flow", label: "Method Flow", icon: GitBranch },
-  { id: "library", label: "Method Library", icon: Library },
-  { id: "report", label: "Report / Export", icon: FileDown }
+  { id: "library", label: "Method Library", icon: Library }
 ];
 
 export function Sidebar({ activeTab, onTabChange }: { activeTab: TabId; onTabChange: (tab: TabId) => void }) {

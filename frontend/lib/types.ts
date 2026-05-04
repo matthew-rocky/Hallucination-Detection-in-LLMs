@@ -2,9 +2,8 @@ export type TabId =
   | "overview"
   | "askQuick"
   | "compareDetectors"
-  | "samples"
   | "results"
-  | "compareResults"
+  | "samples"
   | "flow"
   | "library"
   | "report";
