@@ -242,7 +242,7 @@ export function AppShell() {
 
   return (
     <main className="relative z-10 flex min-h-screen w-full gap-5 p-3 md:p-5">
-      <Sidebar activeTab={state.activeTab} onTabChange={setTab} />
+      <Sidebar activeTab={state.activeTab} onTabChange={setTab} state={state} onRunSample={quickLoadSample} />
       <div className="min-w-0 flex-1 space-y-5">
         <TopStatusBar online={state.backendOnline} methodCount={state.methods.length} mode={state.mode} selectedCount={state.selectedMethods.length} />
         <ErrorBanner message={state.error} offline={!state.backendOnline} />

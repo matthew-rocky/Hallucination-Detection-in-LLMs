@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   Controls,
+  Handle,
   MarkerType,
   MiniMap,
   Position,
@@ -17,6 +18,7 @@ import {
   type NodeProps,
   type OnNodesChange
 } from "@xyflow/react";
+import { motion } from "framer-motion";
 import {
   Bot,
   ClipboardCheck,
@@ -131,12 +133,12 @@ const METHOD_FLOWS: Record<string, FlowDefinition> = {
     limitation: "No source, retrieval, or citation evidence is checked.",
     palette: { color: "#38bdf8", edge: "#67e8f9", soft: "rgba(56,189,248,0.12)", ring: "rgba(56,189,248,0.36)" },
     nodes: [
-      { id: "input", label: "Input Answer", subtitle: "Question + answer", description: "Receives the prompt and single answer being checked.", icon: "input", x: 20, y: 140 },
-      { id: "tokenize", label: "Local LM Tokenization", subtitle: "No external evidence", description: "Tokenizes the answer for local language-model scoring.", icon: "cpu", x: 250, y: 140 },
-      { id: "scoring", label: "Teacher-Forced Scoring", subtitle: "Answer likelihood", description: "Scores answer tokens under a local model using teacher-forced evaluation.", icon: "gauge", x: 500, y: 140 },
-      { id: "features", label: "Confidence Features", subtitle: "NLL / confidence", description: "Summarizes token confidence, negative log likelihood, and related uncertainty signals.", icon: "spark", x: 750, y: 140 },
-      { id: "calibration", label: "Risk Calibration", subtitle: "Heuristics", description: "Maps uncertainty features into calibrated hallucination-risk heuristics.", icon: "shield", x: 1000, y: 140 },
-      { id: "risk", label: "Hallucination Risk", subtitle: "Score + explanation", description: "Returns a risk label, score, and uncertainty-based explanation.", icon: "alert", x: 1250, y: 140 }
+      { id: "input", label: "Input Answer", subtitle: "Question + answer", description: "Receives the prompt and single answer being checked.", icon: "input", x: 0, y: 260 },
+      { id: "tokenize", label: "Local LM Tokenization", subtitle: "No external evidence", description: "Tokenizes the answer for local language-model scoring.", icon: "cpu", x: 260, y: 70 },
+      { id: "scoring", label: "Teacher-Forced Scoring", subtitle: "Answer likelihood", description: "Scores answer tokens under a local model using teacher-forced evaluation.", icon: "gauge", x: 620, y: 260 },
+      { id: "features", label: "Confidence Features", subtitle: "NLL / confidence", description: "Summarizes token confidence, negative log likelihood, and related uncertainty signals.", icon: "spark", x: 760, y: 70 },
+      { id: "calibration", label: "Risk Calibration", subtitle: "Heuristics", description: "Maps uncertainty features into calibrated hallucination-risk heuristics.", icon: "shield", x: 1120, y: 260 },
+      { id: "risk", label: "Hallucination Risk", subtitle: "Score + explanation", description: "Returns a risk label, score, and uncertainty-based explanation.", icon: "alert", x: 1380, y: 80 }
     ],
     edges: [
       { id: "e1", source: "input", target: "tokenize" },
@@ -384,7 +386,7 @@ function createNodes(flow: FlowDefinition, positions?: Record<string, { x: numbe
   return flow.nodes.map((node) => ({
     id: node.id,
     type: "methodNode",
-    position: positions?.[node.id] ?? { x: node.x, y: node.y },
+    position: positions?.[node.id] ?? defaultPosition(flow, { x: node.x, y: node.y }),
     sourcePosition: Position.Right,
     targetPosition: Position.Left,
     data: {
@@ -397,26 +399,52 @@ function createNodes(flow: FlowDefinition, positions?: Record<string, { x: numbe
   }));
 }
 
+function getEdgeHandles(flow: FlowDefinition, sourceId: string, targetId: string) {
+  const source = flow.nodes.find((node) => node.id === sourceId);
+  const target = flow.nodes.find((node) => node.id === targetId);
+  if (!source || !target) return { sourceHandle: "source-right", targetHandle: "target-left" };
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return dx >= 0
+      ? { sourceHandle: "source-right", targetHandle: "target-left" }
+      : { sourceHandle: "source-left", targetHandle: "target-right" };
+  }
+  return dy >= 0
+    ? { sourceHandle: "source-bottom", targetHandle: "target-top" }
+    : { sourceHandle: "source-top", targetHandle: "target-bottom" };
+}
+
 function createEdges(flow: FlowDefinition): Edge[] {
-  return flow.edges.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    animated: true,
-    label: edge.label,
-    markerEnd: { type: MarkerType.ArrowClosed, color: flow.palette.edge },
-    style: {
-      stroke: flow.palette.edge,
-      strokeWidth: edge.optional ? 1.8 : 2.5,
-      strokeDasharray: edge.optional ? "7 7" : undefined
-    },
-    labelStyle: { fill: "#cbd5e1", fontSize: 11 },
-    labelBgStyle: { fill: "rgba(15,23,42,0.82)" }
-  }));
+  const nodeIds = new Set(flow.nodes.map((node) => node.id));
+  return flow.edges
+    .filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target))
+    .map((edge) => {
+      const handles = getEdgeHandles(flow, edge.source, edge.target);
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        sourceHandle: handles.sourceHandle,
+        targetHandle: handles.targetHandle,
+        type: "smoothstep",
+        animated: true,
+        label: edge.label,
+        markerEnd: { type: MarkerType.ArrowClosed, color: flow.palette.edge },
+        style: {
+          stroke: flow.palette.edge,
+          strokeWidth: edge.optional ? 1.9 : 2.7,
+          strokeDasharray: edge.optional ? "5 9" : "9 7",
+          filter: `drop-shadow(0 0 7px ${flow.palette.edge})`
+        },
+        labelStyle: { fill: "#cbd5e1", fontSize: 11 },
+        labelBgStyle: { fill: "rgba(15,23,42,0.86)" }
+      };
+    });
 }
 
 function storageKey(methodId: string) {
-  return `hds-method-flow-layout:${methodId}`;
+  return `hds-method-flow-layout:v3:${methodId}`;
 }
 
 function readSavedPositions(methodId: string) {
@@ -433,43 +461,145 @@ function extractPositions(nodes: FlowNode[]) {
   return Object.fromEntries(nodes.map((node) => [node.id, node.position]));
 }
 
+type RevealEvent = { type: "node" | "edge"; id: string };
+
+function buildRevealEvents(flow: FlowDefinition): RevealEvent[] {
+  const orderedNodes = [...flow.nodes].sort((a, b) => a.x - b.x || a.y - b.y);
+  const seenNodes = new Set<string>();
+  const emittedEdges = new Set<string>();
+  const events: RevealEvent[] = [];
+
+  orderedNodes.forEach((node) => {
+    events.push({ type: "node", id: node.id });
+    seenNodes.add(node.id);
+    flow.edges.forEach((edge) => {
+      const connectsToVisibleNode =
+        (edge.target === node.id && seenNodes.has(edge.source)) ||
+        (edge.source === node.id && seenNodes.has(edge.target));
+      if (connectsToVisibleNode && !emittedEdges.has(edge.id)) {
+        events.push({ type: "edge", id: edge.id });
+        emittedEdges.add(edge.id);
+      }
+    });
+  });
+
+  flow.edges.forEach((edge) => {
+    if (!emittedEdges.has(edge.id)) events.push({ type: "edge", id: edge.id });
+  });
+
+  return events;
+}
+
+function visibleIds(events: RevealEvent[], step: number) {
+  const activeEvents = events.slice(0, Math.max(0, step));
+  return {
+    nodes: new Set(activeEvents.filter((event) => event.type === "node").map((event) => event.id)),
+    edges: new Set(activeEvents.filter((event) => event.type === "edge").map((event) => event.id))
+  };
+}
+
 function MethodNode({ data, selected }: NodeProps<FlowNode>) {
   const Icon = ICONS[data.icon];
+  const handleStyle = {
+    width: 10,
+    height: 10,
+    border: `1px solid ${data.color}`,
+    background: "#020617",
+    boxShadow: `0 0 12px ${data.color}88`
+  };
   return (
-    <div
-      className={`group w-[196px] rounded-2xl border bg-slate-950/80 p-4 text-left shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 ${selected ? "ring-2" : ""}`}
+    <motion.div
+      initial={{ opacity: 0, x: -18, scale: 0.96 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      transition={{ duration: 0.34, ease: "easeOut" }}
+      className={`group min-h-[92px] w-[252px] rounded-3xl border bg-slate-950/84 p-5 text-left shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 ${selected ? "ring-2" : ""}`}
       style={{
         borderColor: data.color,
-        boxShadow: selected ? `0 0 34px ${data.color}55` : `0 0 24px ${data.color}24`,
+        boxShadow: selected ? `0 0 42px ${data.color}66` : `0 0 30px ${data.color}2f`,
         outlineColor: data.color
       }}
     >
+      <Handle id="target-left" type="target" position={Position.Left} style={handleStyle} />
+      <Handle id="source-left" type="source" position={Position.Left} style={{ ...handleStyle, opacity: 0 }} />
+      <Handle id="target-right" type="target" position={Position.Right} style={{ ...handleStyle, opacity: 0 }} />
+      <Handle id="source-right" type="source" position={Position.Right} style={handleStyle} />
+      <Handle id="target-top" type="target" position={Position.Top} style={handleStyle} />
+      <Handle id="source-top" type="source" position={Position.Top} style={{ ...handleStyle, opacity: 0 }} />
+      <Handle id="target-bottom" type="target" position={Position.Bottom} style={{ ...handleStyle, opacity: 0 }} />
+      <Handle id="source-bottom" type="source" position={Position.Bottom} style={handleStyle} />
       <div className="flex items-start gap-3">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/8" style={{ color: data.color }}>
-          <Icon size={19} />
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/8" style={{ color: data.color }}>
+          <Icon size={22} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold leading-5 text-white">{data.label}</p>
-          {data.subtitle && <p className="mt-1 text-[11px] leading-4 text-slate-400">{data.subtitle}</p>}
+          <p className="text-base font-semibold leading-5 text-white">{data.label}</p>
+          {data.subtitle && <p className="mt-2 text-xs leading-4 text-slate-400">{data.subtitle}</p>}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 const nodeTypes = { methodNode: MethodNode };
+const LAYOUT_X_SCALE = 1.38;
+
+function isInternalBaseline(flow: FlowDefinition) {
+  return flow.id === "internal-signal-baseline";
+}
+
+function defaultPosition(flow: FlowDefinition, position: { x: number; y: number }) {
+  return isInternalBaseline(flow) ? position : spaciousPosition(position);
+}
+
+function spaciousPosition(position: { x: number; y: number }) {
+  return {
+    x: Math.round(position.x * LAYOUT_X_SCALE),
+    y: position.y
+  };
+}
 
 function FlowCanvas({ selectedMethod }: { selectedMethod: string }) {
   const flow = useMemo(() => resolveFlow(selectedMethod), [selectedMethod]);
   const initialNodes = useMemo(() => createNodes(flow, readSavedPositions(flow.id)), [flow]);
   const initialEdges = useMemo(() => createEdges(flow), [flow]);
+  const revealEvents = useMemo(() => buildRevealEvents(flow), [flow]);
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(initialNodes);
   const [edges, setEdges] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<FlowNodeData | undefined>(initialNodes[0]?.data);
   const [status, setStatus] = useState("");
+  const [activeStep, setActiveStep] = useState(1);
+  const [playing, setPlaying] = useState(true);
+  const [userInteractedWithViewport, setUserInteractedWithViewport] = useState(false);
   const { fitView } = useReactFlow();
+  const autoCameraRef = useRef(false);
   const sessionPositions = useRef<Record<string, Record<string, { x: number; y: number }>>>({});
   const flowNodeIds = useMemo(() => new Set(flow.nodes.map((node) => node.id)), [flow]);
+  const visible = useMemo(() => visibleIds(revealEvents, activeStep), [activeStep, revealEvents]);
+  const renderedNodes = useMemo(() => nodes.map((node) => ({ ...node, hidden: !visible.nodes.has(node.id) })), [nodes, visible.nodes]);
+  const renderedEdges = useMemo(
+    () => edges.map((edge) => ({ ...edge, hidden: !(visible.edges.has(edge.id) && visible.nodes.has(edge.source) && visible.nodes.has(edge.target)) })),
+    [edges, visible.edges, visible.nodes]
+  );
+  const visibleNodeIds = useMemo(() => nodes.filter((node) => visible.nodes.has(node.id)).map((node) => node.id), [nodes, visible.nodes]);
+  const runCamera = useCallback((nodeIds: string[], options?: { duration?: number; padding?: number; final?: boolean }) => {
+    if (!nodeIds.length) return;
+    const duration = options?.duration ?? 760;
+    autoCameraRef.current = true;
+    fitView({
+      nodes: nodeIds.map((id) => ({ id })),
+      padding: options?.padding ?? (options?.final ? 0.28 : 0.34),
+      duration,
+      minZoom: options?.final ? 0.42 : 0.5,
+      maxZoom: options?.final ? 1.05 : 1.15,
+      interpolate: "smooth"
+    });
+    window.setTimeout(() => {
+      autoCameraRef.current = false;
+    }, duration + 80);
+  }, [fitView]);
+  const fitFullFlow = useCallback((duration = 780) => {
+    runCamera(nodes.map((node) => node.id), { duration, padding: 0.28, final: true });
+  }, [nodes, runCamera]);
 
   useEffect(() => {
     const positions = sessionPositions.current[flow.id] ?? readSavedPositions(flow.id);
@@ -478,8 +608,31 @@ function FlowCanvas({ selectedMethod }: { selectedMethod: string }) {
     setEdges(createEdges(flow));
     setSelectedNode(nextNodes[0]?.data);
     setStatus("");
-    window.setTimeout(() => fitView({ padding: 0.18, duration: 450 }), 0);
-  }, [flow, fitView, setEdges, setNodes]);
+    setActiveStep(1);
+    setPlaying(true);
+    setUserInteractedWithViewport(false);
+    window.setTimeout(() => runCamera([nextNodes[0]?.id].filter(Boolean), { duration: 720, padding: 0.38 }), 0);
+  }, [flow, runCamera, setEdges, setNodes]);
+
+  useEffect(() => {
+    if (!playing) return;
+    if (activeStep >= revealEvents.length) {
+      setPlaying(false);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setActiveStep((step) => Math.min(step + 1, revealEvents.length));
+    }, 560);
+    return () => window.clearTimeout(timeout);
+  }, [activeStep, playing, revealEvents.length]);
+
+  useEffect(() => {
+    if (userInteractedWithViewport || !visibleNodeIds.length) return;
+    const isFinalStep = activeStep >= revealEvents.length;
+    window.setTimeout(() => {
+      runCamera(visibleNodeIds, { duration: isFinalStep ? 860 : 720, padding: isFinalStep ? 0.28 : 0.34, final: isFinalStep });
+    }, 40);
+  }, [activeStep, revealEvents.length, runCamera, userInteractedWithViewport, visibleNodeIds]);
 
   useEffect(() => {
     if (nodes.length && nodes.every((node) => flowNodeIds.has(node.id))) {
@@ -491,18 +644,35 @@ function FlowCanvas({ selectedMethod }: { selectedMethod: string }) {
     onNodesChange(changes);
   }, [onNodesChange]);
 
+  const pauseForUserControl = useCallback(() => {
+    if (autoCameraRef.current) return;
+    setPlaying(false);
+    setUserInteractedWithViewport(true);
+    setStatus("Auto camera paused. Use Resume animation or Replay to follow the pipeline again.");
+  }, []);
+
+  const handleResumeAnimation = useCallback(() => {
+    setUserInteractedWithViewport(false);
+    setPlaying(activeStep < revealEvents.length);
+    window.setTimeout(() => runCamera(visibleNodeIds, { duration: 720, padding: activeStep >= revealEvents.length ? 0.28 : 0.34, final: activeStep >= revealEvents.length }), 0);
+  }, [activeStep, revealEvents.length, runCamera, visibleNodeIds]);
+
   const handleFit = useCallback(() => {
-    fitView({ padding: 0.18, duration: 450 });
-  }, [fitView]);
+    setUserInteractedWithViewport(false);
+    fitFullFlow(760);
+  }, [fitFullFlow]);
 
   const handleResetLayout = useCallback(() => {
     const nextNodes = createNodes(flow);
     sessionPositions.current[flow.id] = extractPositions(nextNodes);
     setNodes(nextNodes);
     setSelectedNode(nextNodes[0]?.data);
+    setActiveStep(revealEvents.length);
+    setPlaying(false);
     setStatus("Layout reset for this session.");
-    window.setTimeout(() => fitView({ padding: 0.18, duration: 450 }), 0);
-  }, [fitView, flow, setNodes]);
+    setUserInteractedWithViewport(false);
+    window.setTimeout(() => runCamera(nextNodes.map((node) => node.id), { duration: 780, padding: 0.28, final: true }), 0);
+  }, [flow, revealEvents.length, runCamera, setNodes]);
 
   const handleSaveLayout = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -516,29 +686,88 @@ function FlowCanvas({ selectedMethod }: { selectedMethod: string }) {
     setStatus("Saved layout cleared.");
   }, [flow.id, handleResetLayout]);
 
+  const handlePlay = useCallback(() => {
+    if (isInternalBaseline(flow)) {
+      const nextNodes = createNodes(flow);
+      sessionPositions.current[flow.id] = extractPositions(nextNodes);
+      setNodes(nextNodes);
+      setSelectedNode(nextNodes[0]?.data);
+    } else {
+      setSelectedNode(nodes.find((node) => revealEvents[0]?.id === node.id)?.data ?? nodes[0]?.data);
+    }
+    setActiveStep(1);
+    setUserInteractedWithViewport(false);
+    setPlaying(true);
+    const firstId = revealEvents[0]?.type === "node" ? revealEvents[0].id : nodes[0]?.id;
+    window.setTimeout(() => runCamera([firstId].filter(Boolean), { duration: 720, padding: 0.38 }), 0);
+  }, [flow, nodes, revealEvents, runCamera, setNodes]);
+
+  const handleReplay = useCallback(() => {
+    if (isInternalBaseline(flow)) {
+      const nextNodes = createNodes(flow);
+      sessionPositions.current[flow.id] = extractPositions(nextNodes);
+      setNodes(nextNodes);
+      setSelectedNode(nextNodes[0]?.data);
+    } else {
+      setSelectedNode(nodes.find((node) => revealEvents[0]?.id === node.id)?.data ?? nodes[0]?.data);
+    }
+    setActiveStep(1);
+    setPlaying(true);
+    setUserInteractedWithViewport(false);
+    const firstId = revealEvents[0]?.type === "node" ? revealEvents[0].id : nodes[0]?.id;
+    window.setTimeout(() => runCamera([firstId].filter(Boolean), { duration: 720, padding: 0.38 }), 0);
+  }, [flow, nodes, revealEvents, runCamera, setNodes]);
+
+  const handleShowAll = useCallback(() => {
+    if (isInternalBaseline(flow)) {
+      const nextNodes = createNodes(flow);
+      sessionPositions.current[flow.id] = extractPositions(nextNodes);
+      setNodes(nextNodes);
+      setSelectedNode(nextNodes[0]?.data);
+    }
+    setActiveStep(revealEvents.length);
+    setPlaying(false);
+    setUserInteractedWithViewport(false);
+    window.setTimeout(() => runCamera(nodes.map((node) => node.id), { duration: 820, padding: 0.28, final: true }), 0);
+  }, [flow, nodes, revealEvents.length, runCamera, setNodes]);
+
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="glass-panel-ai ai-scan-bg h-[calc(100vh-14rem)] min-h-[620px] overflow-hidden rounded-3xl border border-white/10 bg-slate-950/35 shadow-2xl backdrop-blur-xl">
-        <div className="ai-content-absolute left-4 top-4 z-20 flex flex-wrap gap-2">
-          <button onClick={handleFit} className="rounded-2xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">Fit view</button>
+    <div className="space-y-5">
+      <div className="relative h-[72vh] min-h-[660px] max-h-[880px] overflow-hidden rounded-3xl border border-white/10 bg-slate-950/45 shadow-2xl backdrop-blur-xl">
+        <div className="ai-content-absolute left-4 top-4 z-20 flex max-w-[calc(100%-2rem)] flex-wrap gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-2 backdrop-blur-xl">
+          <button onClick={handlePlay} className="rounded-2xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">Play animation</button>
+          <button onClick={() => setPlaying(false)} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Pause</button>
+          {userInteractedWithViewport && <button onClick={handleResumeAnimation} className="rounded-2xl bg-emerald-300/15 px-3 py-2 text-xs font-semibold text-emerald-100">Resume animation</button>}
+          <button onClick={handleReplay} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Replay</button>
+          <button onClick={handleShowAll} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Show all</button>
+          <button onClick={handleFit} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Fit view</button>
           <button onClick={handleResetLayout} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Reset layout</button>
           <button onClick={handleSaveLayout} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Save layout</button>
           <button onClick={handleResetSaved} className="rounded-2xl bg-white/10 px-3 py-2 text-xs font-semibold text-white">Reset saved positions</button>
         </div>
+        <div className="ai-content-absolute bottom-4 left-4 z-20 rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs text-slate-300 backdrop-blur-xl">
+          Step {Math.min(activeStep, revealEvents.length)} / {revealEvents.length} {playing ? "- scanning" : ""}
+        </div>
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={renderedNodes}
+          edges={renderedEdges}
           nodeTypes={nodeTypes}
           onNodesChange={handleNodesChange}
           onNodeClick={(_, node) => setSelectedNode(node.data)}
+          onNodeDragStart={pauseForUserControl}
+          onMoveStart={(event) => {
+            if (event) pauseForUserControl();
+          }}
           nodesDraggable
           nodesConnectable={false}
           elementsSelectable
           panOnDrag
           zoomOnScroll
           fitView
-          minZoom={0.35}
-          maxZoom={1.6}
+          fitViewOptions={{ padding: 0.23, includeHiddenNodes: true }}
+          minZoom={0.45}
+          maxZoom={1.15}
+          defaultEdgeOptions={{ type: "smoothstep" }}
           proOptions={{ hideAttribution: true }}
         >
           <Background color="rgba(148,163,184,0.24)" gap={24} />
@@ -553,49 +782,51 @@ function FlowCanvas({ selectedMethod }: { selectedMethod: string }) {
         </ReactFlow>
       </div>
 
-      <aside className="space-y-4">
-        <section className="glass rounded-3xl p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em]" style={{ color: flow.palette.color }}>{flow.family}</p>
-              <h2 className="mt-3 text-xl font-semibold text-white">{flow.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-400">{flow.subtitle}</p>
+      <section className="glass rounded-3xl p-5">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
+          <div>
+            <div className="flex items-start gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/8" style={{ color: flow.palette.color }}>
+                <Network size={22} />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em]" style={{ color: flow.palette.color }}>{flow.family}</p>
+                <h2 className="mt-2 text-xl font-semibold text-white">{flow.title}</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-400">{flow.subtitle}</p>
+              </div>
             </div>
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/8" style={{ color: flow.palette.color }}>
-              <Network size={22} />
+            <p className="mt-4 max-w-5xl text-sm leading-7 text-slate-300">{flow.explanation}</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="rounded-2xl bg-white/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Required inputs</p>
+                <p className="mt-2 text-sm text-slate-200">{flow.requiredInputs.join(", ")}</p>
+              </div>
+              <div className="rounded-2xl bg-white/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Produces</p>
+                <p className="mt-2 text-sm leading-6 text-slate-200">{flow.output}</p>
+              </div>
+              <div className="rounded-2xl bg-white/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Key limitation</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{flow.limitation}</p>
+              </div>
             </div>
           </div>
-          <p className="mt-4 text-sm leading-7 text-slate-300">{flow.explanation}</p>
-          <div className="mt-5 space-y-3 text-sm">
-            <div className="rounded-2xl bg-white/5 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Required inputs</p>
-              <p className="mt-2 text-slate-200">{flow.requiredInputs.join(", ")}</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Produces</p>
-              <p className="mt-2 leading-6 text-slate-200">{flow.output}</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Key limitation</p>
-              <p className="mt-2 leading-6 text-slate-300">{flow.limitation}</p>
-            </div>
-          </div>
-        </section>
 
-        <section className="glass rounded-3xl p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-cyan-200">Selected node</p>
-          {selectedNode ? (
-            <div className="mt-3">
-              <h3 className="text-lg font-semibold text-white">{selectedNode.label}</h3>
-              {selectedNode.subtitle && <p className="mt-1 text-sm text-slate-400">{selectedNode.subtitle}</p>}
-              <p className="mt-3 text-sm leading-7 text-slate-300">{selectedNode.description}</p>
-            </div>
-          ) : (
-            <p className="mt-3 text-sm leading-6 text-slate-400">Click a node to inspect what that stage does.</p>
-          )}
-          {status && <p className="mt-4 rounded-2xl bg-cyan-300/10 p-3 text-xs text-cyan-100">{status}</p>}
-        </section>
-      </aside>
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-cyan-200">Selected node details</p>
+            {selectedNode ? (
+              <div className="mt-3">
+                <h3 className="text-lg font-semibold text-white">{selectedNode.label}</h3>
+                {selectedNode.subtitle && <p className="mt-1 text-sm text-slate-400">{selectedNode.subtitle}</p>}
+                <p className="mt-3 text-sm leading-7 text-slate-300">{selectedNode.description}</p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-slate-400">Click a node to inspect what that stage does.</p>
+            )}
+            {status && <p className="mt-4 rounded-2xl bg-cyan-300/10 p-3 text-xs text-cyan-100">{status}</p>}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
