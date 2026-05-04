@@ -71,7 +71,6 @@ export function Sidebar({
       <div className={`glass-panel-ai mt-auto rounded-3xl border ${tone.border} bg-slate-950/45 p-4 ${tone.glow}`}>
         <div className="flex items-center gap-3">
           <div className={`relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl ring-1 ${tone.icon}`}>
-            <span className="absolute inset-1 rounded-2xl animate-ping bg-current opacity-15" />
             <Activity className="relative" size={21} />
           </div>
           <div className="min-w-0">
