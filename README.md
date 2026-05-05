@@ -489,7 +489,7 @@ The report frames hallucination detection by detector families and evidence assu
 ## 👤 Author
 
 **Matthew Rocky**  
-M.S. Candidate in Systems Science & Engineering — Interdisciplinary AI  
+M.S. in Systems Science & Engineering, Concentration in Interdisciplinary AI
 University of Ottawa
 
 <p>
@@ -499,9 +499,6 @@ University of Ottawa
 
 ---
 
-## ⭐ Support
-
-If this project helps you understand hallucination detection, LLM evaluation, or trustworthy AI systems, consider starring the repository.
 
 <div align="center">
 
