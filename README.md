@@ -55,8 +55,6 @@ The goal is not to claim that one detector is universally best. Instead, the sys
 
 ## 🖼️ Preview
 
-> Add screenshots to an `assets/` folder and GitHub will render them here.
-
 <p align="center">
   <img src="assets/dashboard-preview.png" alt="Hallucination Detection Dashboard Preview" width="900" />
 </p>
