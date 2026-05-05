@@ -45,10 +45,10 @@ The goal is not to claim that one detector is universally best. Instead, the sys
 ## 🚀 Live Demo
 
 > **Live demo:** Coming soon  
-> Replace the badge/link above with your deployed URL when the app is hosted.
+> 
 
 ```md
-[🚀 Live Demo](https://your-live-demo-url.com)
+[🚀 Live Demo](soon)
 ```
 
 ---
@@ -456,21 +456,6 @@ This is a research and demonstration system, not a production safety guarantee.
 - Retrieval quality depends heavily on the evidence supplied by the user.
 - Fallback heuristics can flag suspicious answers, but they cannot prove truth by themselves.
 - The dashboard is intended for inspection, teaching, comparison, and prototyping.
-
----
-
-## 🛣️ Roadmap
-
-- [ ] Add hosted live demo
-- [ ] Add screenshots and short demo video
-- [ ] Add Docker setup for easier deployment
-- [ ] Add external benchmark dataset support
-- [ ] Add stronger noisy-retrieval and adversarial test cases
-- [ ] Add multi-hop evidence evaluation
-- [ ] Add more advanced NLI-based contradiction scoring
-- [ ] Add optional LLM-based revised answer generation
-- [ ] Add downloadable PDF reports
-- [ ] Add deployment guide for Render or Linux VPS
 
 ---
 
