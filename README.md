@@ -42,6 +42,21 @@ The goal is not to claim that one detector is universally best. Instead, the sys
 
 ---
 
+## 📄 Research Report
+
+This project is based on the accompanying research report:
+
+**A Systematization of Hallucination Detection in Large Language Models**
+
+The report organizes hallucination-detection methods by detector family, evidence assumptions, and verification strategy, and explains the design motivation behind the dashboard.
+
+<p align="center">
+  <a href="./Report/Report%20-%20A%20Systematization%20of%20Hallucination%20Detection%20in%20Large%20Language%20Models.pdf">
+    <img src="https://img.shields.io/badge/Read%20Full%20Report-PDF-EF4444?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" />
+  </a>
+</p>
+
+
 ## 🚀 Live Demo
 
 > **Live demo:** Coming soon  
